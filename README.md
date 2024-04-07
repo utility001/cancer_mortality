@@ -10,13 +10,16 @@ The description of the various feature in the dataset is located in the [data de
 A lasso regression model was used to train the dataset.
 
 **Exploratory data analysis**
-The dataset was explored for the purposes of understanding and identifying various errors
-Outlier detection and removal were also performed
-One hot encoding was performed on the categorical columns
+The dataset was explored for the purposes of understanding and identifying various errors  
+Outlier detection and removal were also performed  
+One hot encoding was performed on the categorical columns  
 
 **Most important features**
 The most important features include. 
-Incidence rate, Median income, percentage of the population that are covered medically (public or private coverage), percentage of unempoyment, etc
++ Incidence rate
++ Median income
++ percentage of the population that are covered medically (public or private coverage),
++ percentage of unempoyment, etc
 
 **Metrics**: 
 + The mean absolute error is `14.519` on the train test and 15.277591827778762 on the test set
