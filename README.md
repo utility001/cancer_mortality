@@ -18,14 +18,14 @@ One hot encoding was performed on the categorical columns
 The most important features include. 
 Incidence rate, Median income, percentage of the population that are covered medically (public or private coverage), percentage of unempoyment, etc
 
-b. **Metrics**: 
-The mean absolute error is `14.519` on the train test and 15.277591827778762 on the test set
-The root mean squared error is: `19.500` on the train  set and `20.42` on the test st
-The R2 score `19.500` on the train set and `20.42` on the test set
+**Metrics**: 
++ The mean absolute error is `14.519` on the train test and 15.277591827778762 on the test set
++ The root mean squared error is: `19.500` on the train  set and `20.42` on the test st
++ The R2 score `19.500` on the train set and `20.42` on the test set
 
 > Note the error is per 100_000 i.e X errors per 100_000 people in the population we are referring to
 
-d. **Model Diagnostics**: 
+**Model Diagnostics**: 
    - Linearity and multicolinearity of model parameters. - The linearity and multicolinearity assumption is satisfied as lasso regression was used for automatic feature selection
    - Serial independence of errors and  homoskedasticity were satisfied
    - The residuals were also verified to be normal
