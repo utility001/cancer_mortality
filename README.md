@@ -9,7 +9,7 @@ The description of the various feature in the dataset is located in the [data de
 **Model selection**:
 A lasso regression model was used to train the dataset.
 
-**Exploratory data analysis**
+**Exploratory data analysis**  
 The dataset was explored for the purposes of understanding and identifying various errors  
 Outlier detection and removal were also performed  
 One hot encoding was performed on the categorical columns  
