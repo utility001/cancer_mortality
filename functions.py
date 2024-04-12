@@ -1,4 +1,7 @@
 import pandas as  pd
+from scipy import stats
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def missing_data(data, show_all=True):
     """
@@ -59,7 +62,7 @@ import pandas as pd
 
 def get_highly_imbalanced_columns(df, threshold=0.9):
     """
-    Get the names of categorical columns where any category constitutes more than a specified threshold.
+    Get the names of categorical columns where any category contains more than a specified threshold.
     
     Parameters:
     - df: pandas DataFrame
@@ -69,7 +72,7 @@ def get_highly_imbalanced_columns(df, threshold=0.9):
 
     Returns:
     - list
-        A list of column names (strings) representing highly imbalanced categorical columns.
+        A list of column names representing highly imbalanced categorical columns.
     """
     highly_imbalanced_columns = []
     
@@ -129,8 +132,7 @@ def unique_values(data, max_colwidth=50):
     return tt
 
 
-import matplotlib.pyplot as plt
-import seaborn as sns
+
 
 # Mini describe
 def mini_describe(data, column_name):
@@ -143,11 +145,16 @@ def mini_describe(data, column_name):
     return desc
 
 
-from scipy import stats
 
-def hist_box_qq(data, columns, second_plot='box', figsize=(12, 5)):
+
+
+def hist_box_qq(data, columns: list, second_plot='box', figsize=(12, 5)):
     """
-    Plot histogram and boxplot(if second plot is 'box') or qqplot (if second plot is 'qq')
+    Plot histogram and boxplot(or qqplot)
+
+    data: DataFrame,
+    columns: List of columns to plot
+    second plot: 'box' = boxplot, 'qq' = qqplot
     """
     num_cols = len(columns)
     
@@ -173,217 +180,6 @@ def hist_box_qq(data, columns, second_plot='box', figsize=(12, 5)):
 
     plt.tight_layout()
     plt.show()
-
-
-
-from scipy.stats import normaltest
-
-# Indentify all features that are normally and not normally distributed
-def identify_normality(data, min_unique_values=10, alpha=0.05):
-    """
-    Returns two lists the first contains feature names of normal numeric columns  
-    and the second contain feature names of non_normal columns
-    """
-    normal_features = []
-    non_normal_features = []
-
-    # Identify numeric features
-    for column in data.select_dtypes(include='number').columns:
-        # Check if column has less than min_unique_values unique values
-        if len(data[column].unique()) < min_unique_values:
-            continue
-        
-        # Perform D'Agostino's K-squared test for normality
-        stat, p = normaltest(data[column])
-        
-        # Check if p-value is greater than alpha
-        if p > alpha:
-            normal_features.append(column)
-        else:
-            non_normal_features.append(column)
-    
-    return normal_features, non_normal_features
-
-
-import numpy as np
-
-# Check for columns that have z score outliers
-def z_score_outlier_info(data, features, threshold=3):
-    """
-    It chcecks whether there aro outliers in a set of features passed to it
-    Returna a dictionary and a list.
-    The dictionary contains the feature and number of outliers found per feature
-    The list contain a list of features that contan outliers
-    """
-    outlier_info = {}
-    outlier_list = []
-    
-    # num_outliers = 0
-    for feature_name in features:
-        # Extract feature data
-        feature_data = data[feature_name]
-        
-        # Calculate mean and standard deviation
-        mean = np.mean(feature_data)
-        std_dev = np.std(feature_data)
-        
-        # Calculate Z-scores
-        z_scores = (feature_data - mean) / std_dev
-        
-        # Find outliers
-        outliers = np.abs(z_scores) > threshold
-        
-        # If any outliers are found, add the feature to the dictionary
-        num_outliers = np.sum(outliers)
-        if num_outliers > 0:
-            outlier_info[feature_name] = num_outliers
-            outlier_list.append(feature_name)
-    
-    return outlier_list, outlier_info
-
-
-
-def z_trim_cap_outliers(data, features, method="trim", threshold=3):
-    """
-    Return a dataframe
-    Trim or cap the outliers
-    method: str ['trim' to trim the outliers, 'cap' to cap the outliers]
-    """
-    # Make a copy of the original data
-    processed_data = data.copy()
-    
-    for feature_name in features:
-        # Extract feature data
-        feature_data = processed_data[feature_name]
-        
-        # Calculate mean and sd and zscore
-        mean = np.mean(feature_data)
-        std_dev = np.std(feature_data)
-        
-        # Calculate the lower and upper bound
-        upper_bound = mean + (threshold * std_dev)
-        lower_bound = mean - (threshold * std_dev)
-
-        if method == "trim":
-            # Trim the outliers off
-            processed_data = processed_data[(feature_data >= lower_bound) & (feature_data <= upper_bound)]
-
-        elif method == "cap":
-            # Cap outliers
-            processed_data.loc[feature_data > upper_bound, feature_name] = upper_bound
-            processed_data.loc[feature_data < lower_bound, feature_name] = lower_bound
-    
-    return processed_data
-
-
-
-
-from scipy.stats import skew
-
-# Identify skewed columns
-def identify_skewed_columns(data, features, skew_threshold=0.5):
-    """
-    It identify skewed features from a list of features passed to it based on a threshold
-    Returna a list and a dictionary
-    The list is a list of those feaures
-    The dictionary is information about those features
-    """
-    skewed_features = []
-    skewed_info={}
-    
-    for feature in features:
-        # Compute skewness of the feature
-        feature_skewness = skew(data[feature])
-        
-        # Check if skewness exceeds the threshold
-        if abs(feature_skewness) > skew_threshold:
-            skewed_info[feature] = feature_skewness
-            skewed_features.append(feature)
-            
-    skewed_info = pd.DataFrame(
-        list(skewed_info.items()), 
-        columns=["Features", "skew"]).set_index('Features')
-    
-    return skewed_features, skewed_info
-
-
-
-
-import numpy as np
-# Check for columns that have skewed outliers
-def skewed_outliers_info(data, features, iqr_multiplier=1.5):
-    """
-    Get information about skewed outliers
-    Returns
-    """
-    outlier_info = {}
-    outlier_list = []
-    
-    for feature_name in features:
-        # Extract feature data
-        feature_data = data[feature_name]
-        
-        # Calculate IQR
-        q25 = np.percentile(feature_data, 25)
-        q75 = np.percentile(feature_data, 75)
-        iqr = q75 - q25
-        
-        # Define outlier boundaries
-        lower_bound = q25 - iqr_multiplier * iqr
-        upper_bound = q75 + iqr_multiplier * iqr
-        
-        # Find outliers
-        outliers = (feature_data < lower_bound) | (feature_data > upper_bound)
-        
-        # If any outliers are found, add the feature to the dictionary
-        num_outliers = np.sum(outliers)
-        if num_outliers > 0:
-            outlier_info[feature_name] = num_outliers
-            outlier_list.append(feature_name)
-
-    outlier_info = pd.DataFrame(
-        list(outlier_info.items()), 
-        columns=["Features", "Number of outliers"]).set_index('Features')
-    
-    return outlier_list, outlier_info
-
-
-
-
-def trim_cap_skewed_outliers(data, features, method='trim', iqr_multiplier=1.5):
-    """
-    Trims or cap skewed featuers that contain outliers
-    Returns a dataframe
-    """
-    processed_data = data.copy()
-    
-    for feature_name in features:
-        # Extract feature data
-        feature_data = processed_data[feature_name]
-        
-        # Calculate IQR
-        q25 = np.percentile(feature_data, 25)
-        q75 = np.percentile(feature_data, 75)
-        iqr = q75 - q25
-        
-        # Define outlier boundaries
-        lower_bound = q25 - iqr_multiplier * iqr
-        upper_bound = q75 + iqr_multiplier * iqr
-        
-        # Trimming outliers
-        if method == 'trim':
-            processed_data = processed_data[(feature_data >= lower_bound) & (feature_data <= upper_bound)]
-        # Capping outliers
-        elif method == 'cap':
-            # Ensure dtype compatibility before assignment
-            lower_bound = feature_data.dtype.type(lower_bound)
-            upper_bound = feature_data.dtype.type(upper_bound)
-            processed_data.loc[feature_data < lower_bound, feature_name] = lower_bound
-            processed_data.loc[feature_data > upper_bound, feature_name] = upper_bound
-    
-    return processed_data
-
-
 
 
 def assess_normality(y_true, y_pred):
@@ -428,8 +224,6 @@ def plot_residuals_vs_fitted(y_true, y_pred):
     plt.title('Residuals vs. Fitted values')
     plt.axhline(y=0, color='r', linestyle='-')
     plt.show()
-
-
 
 
 
